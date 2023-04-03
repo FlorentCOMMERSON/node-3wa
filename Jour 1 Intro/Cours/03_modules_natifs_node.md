@@ -1,7 +1,5 @@
 # Modules Natifs node
 
-Modules natifs. Présentation.
-
 ## Introduction
 
 Pour importez dans votre script courant un module, vous utiliserez la fonction **require** de Node :
