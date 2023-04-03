@@ -59,9 +59,9 @@ console.log('End');
 
 La **Task Queue**, c'est l'endroit où les callbacks attendent d'être exécutés. Cette pile va être dépilée par un autre élément : **l'event loop**. Il lit périodiquement et sous certaines conditions ce qui s'y trouve. 
 
-La Stack Queue se videra au fur et à mesure de l'exécution des callbacks, fonctions en attentent dans cette pile. Le code y est exécuté en mode **FIFO** (first in first out).
+La Stack Queue se videra au fur et à mesure de l'exécution des callbacks, fonctions en attente dans cette pile. Le code y est exécuté en mode **FIFO** (first in first out).
 
-Voici un schéma pour terminé, plus précis, de l'Event Loop dans le contexte de Node.js ou Navigateur avec la V8 :
+Voici un schéma pour terminer, plus précis, de l'Event Loop dans le contexte de Node.js ou Navigateur avec la V8 :
 
 <img src="images/event_loop.png" width="400" />
 
