@@ -10,11 +10,7 @@ C'est une plateforme de service écrite en JavaScript orientée vers les applica
 
 Node.js est basé sur l'**Event Loop**, comme JS d'ailleurs, qui est un design pattern orienté **gestion d'événement aysnchrone**. Rappelons que JavaScript est **mono-thread**, c'est-à-dire un seul fil d'exécution, il est cependant capable de gérer des événements asynchrones. 
 
-Voir le schéma ci-après ( représentation simplifiée ).
-
-L'asynchronisme en JS permet de gérer des exécutions de codes différées, en mettant son code dans une autre task techniquement dans une **task queue**, sans bloquer le fil d'exécution principale. Ce code sera remis dans la task principale lorsque les fonctions de callback seront à exécuter.
-
-<img src="../images/async.png" width="400" />
+L'asynchronisme en JS permet de gérer des exécutions de codes différées, en mettant son code dans une autre task techniquement dans une **task queue**, sans bloquer le fil d'exécution principal. Ce code sera remis dans la task principale lorsque les fonctions de callback seront à exécuter.
 
 ## Stack principale
 
@@ -65,7 +61,7 @@ La Stack Queue se videra au fur et à mesure de l'exécution des callbacks, fonc
 
 Voici un schéma pour terminé, plus précis, de l'Event Loop dans le contexte de Node.js ou Navigateur avec la V8 :
 
-<img src="../images/event_loop.png" width="400" />
+<img src="images/event_loop.png" width="400" />
 
 
 
