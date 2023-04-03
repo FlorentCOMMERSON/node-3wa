@@ -14,8 +14,6 @@ Voir le schéma ci-après ( représentation simplifiée ).
 
 L'asynchronisme en JS permet de gérer des exécutions de codes différées, en mettant son code dans une autre task techniquement dans une **task queue**, sans bloquer le fil d'exécution principale. Ce code sera remis dans la task principale lorsque les fonctions de callback seront à exécuter.
 
-<img src="../images/async.png" width="400" />
-
 ## Stack principale
 
 La stack ou pile d'exécution, c'est le premier élément à prendre en compte lors de l'exécution du code JS, tout le code JS y est exécuté.
