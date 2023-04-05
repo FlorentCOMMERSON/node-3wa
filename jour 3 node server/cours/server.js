@@ -18,7 +18,7 @@ const server = http.createServer((req, res) => {
         res.end();
         return;
     }
-
+    
     if (url === 'test') {
         // La méthode write écrit la réponse en sortie
         // end termine la requête. Il ne faut pas l'oubliez c'est primordiale pour stopper le processus. 
