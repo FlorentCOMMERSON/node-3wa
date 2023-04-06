@@ -11,7 +11,7 @@ else
 // compile
 const compileTemplate = pug.compile(template);    
 
-const result = compileTemplate({ age : 1});
+compileTemplate({ age : 1});
 
 // compileFile pour un fichier externe pug
 const compileTemplate2 = pug.compileFile('template.pug');
