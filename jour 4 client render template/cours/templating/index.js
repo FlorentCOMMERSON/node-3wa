@@ -42,3 +42,15 @@ try {
     res.end(err.message);
 }
 
+// SYNTAXE de pug
+
+const compileTemplate3 = pug.compileFile('cours.pug');
+
+const data= {
+    name: 'Norbert',
+    age: 33,
+    gender : 'M'
+}
+
+compileTemplate(data);
+

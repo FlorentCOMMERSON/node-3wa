@@ -1,0 +1,117 @@
+// Syntaxe PUG classique
+nav
+    ul 
+        li 
+            a(href='/home') Home 
+        li 
+            a(href='/portfolio') portfolio 
+        li
+            a(href='/contact') contact 
+
+//syntaxe inline plus lisible pour les tags imbriqués 
+nav: ul
+    li: a(href='/home') Home 
+    li: a(href='/portfolio') portfolio
+    li: a(href='/contact') contact 
+
+// Les attributs inline
+input(type='radio' name='gender' value='Male')
+// ou sur plusieurs lignes
+input(
+    type='radio' 
+    name='gender' 
+    value='Male'
+)
+
+// syntaxe des sélecteurs CSS pour gérer les attributs `class` et `id` :
+main#container 
+    article 
+        .article-inner // créer une div avec une classe article-inner
+            p. // récupère un bloc de texte sur plusieurs lignes
+                Lorem Ipsum 
+                ddsk,kkdzk,
+                dqdq
+
+// Pug autorise l'écriture classique html :
+p Ceci est un texte <strong> gras </strong>
+//équivaut à :
+p Un nouveau texte 
+    strong gras
+
+//écrire du texte standard sur une ligne
+div 
+    p je suis dans le paragraphe 
+    | Je suis en dehors du paragraphe
+
+//on passe les variables à la vue sous forme d'objet
+h1 Hello #{name}
+p Vous avez #{age} et êtes #{gender}
+
+// raccourci quand la balise ne contient que la valeur d'une expression avec =
+h1 Hello #{name}
+p Votre âge :
+    output= age
+select
+    option(value=gender)= gender
+
+// écrire du code JS pour de petites instructions
+article 
+    - const { title, date, author } = post 
+    h1= title 
+    p Written by #{author}
+    time(datetime=date.toISOString()) = date.toLocalDateString() 
+
+//écrire des blocs de code sur plusieurs lignes
+article 
+    - 
+        const { title, date, author } = post; 
+        const ISODate = date.toISOString();
+        const formattedDate = date.toLocalDateString()
+    
+    h1= title
+    p Written by #{author}
+    time(datetime=ISODate) = formattedDate 
+
+// écrire du code JS qui sera interprêté côté client
+input(type='text' id='message')
+p Hello <span id="messageValue"></span>
+
+script.
+    const messageEl = document.getElementById('message');
+    const span = document.getElementById("messageValue");
+    messageEl.oninput = function(event) {
+        span.textConent = event.target.value;
+    }
+
+//les conditions basiques
+if results 
+    if results.length > 1
+        p Il y a #{results.length} résultats de recherche 
+    else if results.length === 1
+        p Il y a un unique résultat 
+    else 
+        p aucun résultat 
+else 
+    p Aucune recherche effectuée 
+
+//négation
+unless user.logged 
+    p Veuillez vous authentifier
+// ou
+if !user.logged 
+    p Veuillez vous authentifier
+
+//switch case
+case user.gender 
+    when 'M'
+        p Homme 
+    when 'F'
+        p Femme 
+    default 
+        p 'Autre'
+
+
+//- Commentaire non affiché dans le rendu
+// Lui oui
+<!-- Commentaire html !-->
+
