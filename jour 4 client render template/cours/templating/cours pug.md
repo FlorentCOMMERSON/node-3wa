@@ -454,3 +454,107 @@ div.commentaires
     <!-- Mais celui-ci oui !-->
 </div>
 ```
+
+// Boucles
+```pug
+//Boucle each
+- const users = ['Norbert', 'Antoine', 'Dougy'];
+ul#users
+    each user in users
+        li #{user} (#{index})
+
+//Boucle for
+ul#user
+    - const users = new Set(['JM', 'Antoine', 'Marion']);
+
+    - for (const user of users)
+        li= user
+
+//boucle while
+- let i = 1;
+
+while i <= 10
+    div= i
+    - i++
+
+// Mixin
+
+mixin menuItem
+    li: a(href='#') Menu item
+
+ul
+    +menuItem
+    +menuItem
+    +menuItem
+
+// Mixin avec arguments
+
+mixin menuItem(url, title)
+    li: a(href='url')= title
+
+ul
+    +menuItem('/', 'Home')
+    +menuItem('/portfolio', 'Réalisations')
+    +menuItem('/contact', 'Me contacter')
+
+// 
+mixin listItem(value)
+    li&attributes(attributes)= value
+
+ul
+    +listItem('One')(class='truc')
+    +listItem('two')(class='machin' title='je suis machin')
+
+// Inclusions et Layouts
+
+//Fichier principal
+header
+    include menu.pug
+main.container
+    h1 Welcome !
+
+//Fichier "menu.pug"
+nav: ul
+    li: a(href='/') Home
+    li: a(href='/portfolio') Références 
+
+// frontend-layout.pug
+
+doctype html
+html (lang="fr")
+    head
+        meta (charset="UTF-8")
+        title My Layout
+
+        link(rel="stylesheet" href="bootstrap.min.css")
+        block styles
+
+        block scripts
+    body
+        header: nav: ul
+            li: a(href='/') Home
+            li: a(href='/portfolio') Références 
+
+        block content
+
+    footer Copyright, Tous droits réservés
+
+// exemple utilisation du layout
+extends frontend-layout.pug
+
+block styles
+     link(rel="stylesheet" href="monCSSpourCETTEpage.css")
+
+block scripts
+    script(src="monScript.js")
+
+block content
+    h1 Welcome ! What did you buying ?    
+
+
+```
+
+
+
+
+
