@@ -455,30 +455,72 @@ div.commentaires
 </div>
 ```
 
-// Boucles
+## Boucles
+
+Pug propose un mot-clé `each` pour itérer sur des tableaux `[]` ou objets `{}` JavaScript :
+
 ```pug
-//Boucle each
-- const users = ['Norbert', 'Antoine', 'Dougy'];
+- const dogs = ['Norbert', 'Beethoven', 'Dougy'];
 ul#users
-    each user in users
-        li #{user} (#{index})
+    each dog in dogs
+        li #{user}
+```
 
-//Boucle for
-ul#user
-    - const users = new Set(['JM', 'Antoine', 'Marion']);
+rendra :
 
-    - for (const user of users)
-        li= user
+```html
+<ul id="dogs">
+    <li>Norbert</li>
+    <li>Beethoven</li>
+    <li>Dougy</li>
+</ul>
+```
 
-//boucle while
+On peut également récupérer l'indice du tableau :
+```pug
+each dog, index in dogs
+    li #{dog} (#{index})
+```
+
+**⚠ Attention !** Seuls les tableaux et objets littéraux sont concernés. En effet, `each` n'est pas capable de boucler sur des objets JavaScript itérables qui implémentent le `Symbol.Iterator`, tels que des `Set` ou des `Map`. Pour ça, il faut utiliser une boucle `for … of` classique :
+
+```pug
+ul#users
+    - const dogs = new Set(['Norbert', 'Beethoven', 'Dougy']);
+
+    - for (const dog of dogs)
+        li= dog
+```
+
+On peut aussi faire un `while` simple :
+
+```pug
 - let i = 1;
 
 while i <= 10
     div= i
+
     - i++
+```
 
-// Mixin
+```html
+<div>1</div>
+<div>2</div>
+<div>3</div>
+<div>4</div>
+<div>5</div>
+<div>6</div>
+<div>7</div>
+<div>8</div>
+<div>9</div>
+<div>10</div>
+```
 
+## Mixins
+
+Les mixins s'inspirent du pattern DRY (Don't Repeat Yourself). Il s'agit de simples *fonctions* qui répètent un morçeau de HTML. On les déclare avec le mot-clé `mixin` et on les utilise en les précédent de l'opérateur `+` :
+
+```pug
 mixin menuItem
     li: a(href='#') Menu item
 
@@ -486,73 +528,213 @@ ul
     +menuItem
     +menuItem
     +menuItem
+```
 
-// Mixin avec arguments
+rendra :
 
+```html
+<ul>
+    <li><a href="#">Menu item</a></li>
+    <li><a href="#">Menu item</a></li>
+    <li><a href="#">Menu item</a></li>
+</ul>
+```
+
+Les mixins peuvent prendre des arguments :
+
+```pug
 mixin menuItem(url, title)
-    li: a(href='url')= title
+    li: a(href=url)= title
 
 ul
     +menuItem('/', 'Home')
     +menuItem('/portfolio', 'Réalisations')
     +menuItem('/contact', 'Me contacter')
+```
+```html
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/portfolio">Réalisations</a></li>
+    <li><a href="/contact">Me contacter</a></li>
+</ul>
+```
 
-// 
+Il est possible d'ajouter à la suite les attributs passés à la mixin :
+
+```pug
 mixin listItem(value)
     li&attributes(attributes)= value
+    //- 'attributes' est un argument disponible dans chaque mixin
 
 ul
-    +listItem('One')(class='truc')
-    +listItem('two')(class='machin' title='je suis machin')
+    +listItem('One')(class="dirty")
+    +listItem('Two')(class="shiny" title="I'm shiny")
+    +listItem('Three')(class="rare")
+```
+```html
+<ul>
+    <li class="dirty">One</li>
+    <li class="shiny" title="I'm shiny">Two</li>
+    <li class="rare">Three</li>
+</ul>
+```
 
-// Inclusions et Layouts
+Les mixins sont très pratiques pour éviter de répéter de gros blocs de code HTML. On peut les voir comme des Stateless Components (aussi appelés Presentational Components) en React.js
 
-//Fichier principal
+## Inclusions et Layouts
+
+Comme tous les moteurs de templating modernes, il est possible de séparer ses templates en plusieurs morçeaux afin d'améliorer le découpage.
+
+Dans Pug, on utilise l'instruction `include`. Les chemins sont relatifs par rapport au fichier qui fait l'inclusion.
+
+```pug
+//- Fichier principal
 header
     include menu.pug
 main.container
-    h1 Welcome !
+    h1 Welcome Home!
+```
 
-//Fichier "menu.pug"
+```pug
+//- Fichier "menu.pug"
 nav: ul
-    li: a(href='/') Home
-    li: a(href='/portfolio') Références 
+    li: a(href="/") Home
+    li: a(href="/references") References
+    li: a(href="/contact") Contact
+```
 
-// frontend-layout.pug
+Le rendu du fichier principal donnera :
+
+```html
+<header>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/portfolio">References</a></li>
+            <li><a href="/contact">Contact</a></li>
+        </ul>
+    </nav>
+</header>
+<main class="container">
+    <h1>Welcome Home!</h1>
+</main>
+```
+
+Les inclusions sont pratiques pour de petits morçeaux de fichiers, mais parfois on a besoin de plus de flexibilité pour travailler avec des pages web complètes.
+
+Assembler manuellement tous les éléments d'une page web comme un *Doctype*, des menus (souvent dynamiques), des headers, des footers, des scripts clients, des styles, … peut vite se transformer en découpage complexe et rendre le template difficilement adaptable pour tous les cas de figure.
+
+Pour cela, on utilise plutôt le principe de **layouts**.
+
+Un layout est un squelette de page web, dans lequel on peut déclarer des `block`. Par exemple, soit le fichier de layout suivant, nommé `frontend-layout.pug` :
+
+```pug
+//- frontend-layout.pug
 
 doctype html
-html (lang="fr")
+html(lang="fr")
     head
-        meta (charset="UTF-8")
+        meta(charset="UTF-8")
         title My Layout
 
         link(rel="stylesheet" href="bootstrap.min.css")
         block styles
 
+        script(src="bootstrap.min.js")
         block scripts
     body
+        
         header: nav: ul
-            li: a(href='/') Home
-            li: a(href='/portfolio') Références 
+            li: a(href="/") Home
+            li: a(href="/portfolio") References
+            li: a(href="/contact") Contact
 
         block content
 
-    footer Copyright, Tous droits réservés
+        footer © Copyright, Tous droits réservés
+```
 
-// exemple utilisation du layout
+Les 3 blocks `styles`, `scripts` et `content` permettront d'accueillir du contenu déclaré par d'autres fichiers qui **se baseront sur ce layout**.
+
+On peut maintenant créer un autre fichier qui va se baser sur ce layout grâce au mot-clé `extends` :
+
+```pug
 extends frontend-layout.pug
 
 block styles
-     link(rel="stylesheet" href="monCSSpourCETTEpage.css")
+    link(rel="stylesheet" href="monStyle.css")
 
 block scripts
     script(src="monScript.js")
 
 block content
-    h1 Welcome ! What did you buying ?    
-
-
+    h1 Bienvenue sur la page d'accueil
 ```
+
+Le rendu de la page ci-dessus donnera le résultat suivant :
+
+```html
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>My Layout</title>
+        <link rel="stylesheet" href="bootstrap.min.css">
+        <link rel="stylesheet" href="monStyle.css">
+        <script src="bootstrap.min.js"></script>
+        <script src="monScript.js"></script>
+    </head>
+    <body>
+        <header>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/portfolio">References</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
+        <h1>Bienvenue sur la page d'accueil</h1>
+        <footer>© Copyright, Tous droits réservés</footer>
+    </body>
+</html>
+```
+
+À noter qu'il n'est pas du tout obligatoire d'utiliser tous les blocs déclarés dans le layout principal. Un block non déclaré sera simplement ignoré :
+
+```pug
+extends frontend-layout.pug
+
+block content
+    h1 Mentions légales
+    p Lorem ipsum dolor sit amet …
+```
+```html
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>My Layout</title>
+        <link rel="stylesheet" href="bootstrap.min.css">
+        <script src="bootstrap.min.js"> </script>
+    </head>
+    <body>
+        <header>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/portfolio">References</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
+        <h1>Mentions légales</h1>
+        <p>Lorem ipsum dolor sit amet …</p>
+        <footer>© Copyright, Tous droits réservés</footer>
+    </body>
+</html>
+```
+
 
 
 
