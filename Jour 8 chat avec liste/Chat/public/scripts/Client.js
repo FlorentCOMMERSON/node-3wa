@@ -10,6 +10,7 @@ class Client {
         this.socket = io.connect('/'); // "socket" est un objet représentant ce socket client unique
 
         this.nickname = window.prompt('Choisissez un pseudonyme');
+        this._setNickname(this.nickname);
 
         // Dom elements
         this.$form     = $('form#chat');
@@ -32,6 +33,28 @@ class Client {
             }
         */
         this.socket.on('message:new', ({nickname, message}) => this.receiveMessage(nickname, message));
+        this.socket.on('user:list', (usernamesList) => this.updateUsersList(usernamesList));
+    }
+
+    /*
+        Cette méthode :
+        - notifie le serveur du changement de nickname de ce client
+    */
+    _setNickname(nickname) {
+        this.socket.emit('user:nickname', nickname);
+    }
+
+    updateUsersList(usernamesList) {
+        let template = '';
+        usernamesList.forEach(username => {
+            template += `<li>
+                            ${username === this.nickname 
+                                ? `<strong>${username}</strong>`
+                                : username
+                            }
+                        </li>`;
+            $('#usersList').html(template);
+        })
     }
 
     /**
@@ -51,10 +74,7 @@ class Client {
      * Émet un message de ce client vers le serveur
      */
     sendMessage(message) {
-        this.socket.emit('message:new', {
-            nickname: this.nickname,
-            message: message
-        });
+        this.socket.emit('message:new', message);
     }
 
     /**

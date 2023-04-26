@@ -37,16 +37,17 @@ html(lang="fr")
                             li
                                 a.text-light(href="#", title="Accéder au channel Random") Random
 
-                main.col-md-10(role="main")
+                main.col-md-8(role="main")
                     form#chat
                         .form-group
                             input#message.form-control(type="text", placeholder="Tapez votre message ici ...", autofocus)
 
                         ul#messages.list-group.list-group-flush
 
-                //- aside.col-md-2.bg-secondary.text-light
-                //-     .sidebar-sticky
-                //-         h2 Personnes connectées
+                aside.col-md-2.bg-secondary.text-light
+                    .sidebar-sticky
+                        h2 Personnes connectées
+                            ul#usersList
 
     script(src="/lib/jquery.min.js")
     script(src="/lib/bootstrap.min.js")
