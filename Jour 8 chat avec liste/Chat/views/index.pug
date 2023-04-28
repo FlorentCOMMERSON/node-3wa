@@ -29,25 +29,28 @@ html(lang="fr")
                 aside.col-md-2.bg-secondary.text-light
                     .sidebar-sticky
                         h2 Channels
-                        ul
-                            li
-                                a.text-light(href="#", title="Accéder au channel Général") Général
-                            li
-                                a.text-light(href="#", title="Accéder au channel Gaming") Gaming
-                            li
-                                a.text-light(href="#", title="Accéder au channel Random") Random
+                        ul#channelsList
 
                 main.col-md-8(role="main")
+                    h2 Vous êtes sur le channel
+                        | &nbsp;#
+                        span.channelTitle
+                    hr
                     form#chat
                         .form-group
                             input#message.form-control(type="text", placeholder="Tapez votre message ici ...", autofocus)
+                    p 
+                        span#typingNotification.badge.badge-light 
 
-                        ul#messages.list-group.list-group-flush
+                    ul#messages.list-group.list-group-flush
 
-                aside.col-md-2.bg-secondary.text-light
+                aside.col-md-2.bg-light.text-dark
                     .sidebar-sticky
-                        h2 Personnes connectées
-                            ul#usersList
+                        h2 Dans 
+                            | &nbsp;#
+                            span.channelTitle
+                            | :
+                        ul#usersList
 
     script(src="/lib/jquery.min.js")
     script(src="/lib/bootstrap.min.js")

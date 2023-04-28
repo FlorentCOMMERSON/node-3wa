@@ -1,12 +1,17 @@
 const ent = require('ent')
 
 const User = require('./User')
+const Channel = require('./Channel')
 
 class Chat {
     constructor(io) {
         this.io = io
-        this.users = [] // Liste des utilisateurs
-        this.messages = [] // Liste des messages
+        this.channels = []
+        this.channels.push(
+            new Channel(io, 'general'),
+            new Channel(io, 'movies'),
+            new Channel(io, 'gaming')
+        )
     }
 
     onConnection(socket) {
@@ -15,39 +20,68 @@ class Chat {
         socket.once('user:nickname', (nickname) => {
             // Création du nouvel utilisateur
             const user = new User(socket, nickname)
-            // Ajoute cet utilisateur à la liste
-            this.users.push(user)
-            // Envoi de la nouvelle liste à tous les sockets connectés
-            this.io.sockets.emit('user:list', this.getUsernamesList())
+            
+            let defaultChannel = this.getChannelByTitle('general')
+            defaultChannel.addUser(user)
+            socket.emit('init', {
+                channelsList: this.getChannelList(),
+                userChannelId: user.channelId 
+            })
 
-            // Mise en place des écouteurs d'événement sur ce socket
-            socket.on('message:new', (message) => this._onNewMessage(user, message))
+            // Mise en place d'écouteurs d'évènements sur ce socket
+            socket.on('message:new', (message) =>this._onNewMessage(user, message))
             socket.on('disconnect', () => this._onUserDisconnect(user))
+            socket.on('notify:typing', () => this._onNotifyTyping(user))
+            socket.on('channel:change', (channelId) => this._onChangeChannel(user, channelId))
         })
     }
 
-    _onUserDisconnect(user) {
-        let index = this.users.indexOf(user)
-        if (index > -1) {
-            this.users.splice(index, 1)
+    _onNewMessage(user, message){
+        const userChannel = this.getChannelById(user.channelId)
+        userChannel.addMessage(user, message)
+    }
 
-            user.destroy()
+    _onUserDisconnect(user){
+        let userChannel = this.getChannelById(user.channelId)
+        userChannel.removeUser(user)
+        user.destroy();
+    }
 
-            // Envoi de la nouvelle liste à tous les sockets connectés
-            this.io.sockets.emit('user:list', this.getUsernamesList())
+    _onNotifyTyping(user){
+        user.socket.broadcast.to(user.channelId).emit('notify:typing', user.nickname)
+    }
+
+    _onChangeChannel(user, channelId){
+        const oldChannel = this.getChannelById(user.chanelId)
+        const newChannel = this.getChannelById(channelId)
+
+        if(!(oldChannel instanceof Channel) || !(newChannel instanceof Channel)){
+            return console.warn(`_onChangeChannel : Channel(s) invalide(s)`)
         }
+
+        if (newChannel.users.includes(user)){
+            return console.warn(`_onChangeChannel : L'utilisateur ${user.nickname} se trouve déjà dans le channel ${newChannel.title}`)
+        }
+
+        oldChannel.removeUser(user)
+        newChannel.addUser(user)
     }
 
-    _onNewMessage(user, message) {
-        // Sécurisation du message 
-        message = ent.encode(message);
-
-        this.io.sockets.emit('message:new', {message, nickname: user.nickname})
+    getChannelList() {
+        return this.channels.map(channel => ({
+            id: channel.id,
+            title: channel.title
+        }))
     }
 
-    getUsernamesList() {
-        return this.users.map(user => user.nickname);
+    getChannelByTitle(title){
+        return this.channels.find(channel => channel.title === title)
     }
+
+    getChannelById(id){
+        return this.channels.find(channel => channel.id === id)
+    }
+
 }
 
 module.exports = Chat

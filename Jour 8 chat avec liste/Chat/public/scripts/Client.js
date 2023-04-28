@@ -9,13 +9,20 @@ class Client {
         */
         this.socket = io.connect('/'); // "socket" est un objet représentant ce socket client unique
 
+        do{
         this.nickname = window.prompt('Choisissez un pseudonyme');
+        } while (typeof this.nickname !== 'string' || this.nickname.trim() ==='')
         this._setNickname(this.nickname);
+
+        this.channelId = null;
 
         // Dom elements
         this.$form     = $('form#chat');
         this.$message  = $('input#message');
         this.$messages = $('ul#messages');
+        this.$channelsList = $('ul#channelsList');
+
+        this.typingNotificationTimer = 0;
         
         /*
             La syntaxe ({nickname, message}) est appelée en ES6 "Object param destructuring"
@@ -32,8 +39,40 @@ class Client {
                 ...
             }
         */
+        this.socket.once('init', (data) => this._onInit(data));
+        this.socket.on('message:list', (messagesList) => this.updateMessagesList(messagesList))
         this.socket.on('message:new', ({nickname, message}) => this.receiveMessage(nickname, message));
         this.socket.on('user:list', (usernamesList) => this.updateUsersList(usernamesList));
+        this.socket.on('notify:typing', (username) => this.someoneIsTyping(username));
+    }
+
+    _onInit({channelsList, userChannelId}) {
+        this.channelId = userChannelId;
+        this.updateChannelList(channelsList);
+    }
+
+    updateChannelList(channelsList){
+        let template = '';
+        let currentChannel = '';
+        channelsList.forEach(channel => {
+            if(this.channelId === channel.id){
+                currentChannel = channel
+            }
+            template += `<li>
+                <a class="text-light ${this.channelId === channel.id && 'bg-dark'}" href="#" 
+                data-channel-id="${channel.id}" title="Accéder au channel ${channel.title}">
+                    ${channel.title}
+                </a>
+            </li>`;
+        });
+        $('#channelsList').html(template);
+
+        $('span.channelTitle').text(currentChannel.title.trim())
+    }
+
+    changeChannel(channelId) {
+        this.channelId = channelId
+        this.socket.emit('channel:change', channelId)
     }
 
     /*
@@ -43,6 +82,29 @@ class Client {
     _setNickname(nickname) {
         this.socket.emit('user:nickname', nickname);
     }
+
+    someoneIsTyping(username) {
+        $('#typingNotification').text(`${username} est en train d'écrire...`);
+
+        clearTimeout(this.typingNotificationTimer);
+        this.typingNotificationTimer = window.setTimeout(() => {
+            $('#typingNotification').empty();
+        }, 5000)
+    }
+
+    updateMessagesList(messagesList){
+        let html = '';
+
+        messagesList.reverse().forEach((message) => {
+            html += `<li class="list-group-item">
+                        <span class="badge badge-dark">${message.nickname}</span>
+                        ${message.message} 
+                    </li>`;
+        })
+
+        this.$messages.html(html);
+    }
+
 
     updateUsersList(usernamesList) {
         let template = '';
@@ -68,6 +130,31 @@ class Client {
             this.sendMessage(this.$message.val());
             this.$message.val('')[0].focus();
         });
+
+        this.$message.on('input', (event) => {
+            if (this.$message.val.trim() !== '') {
+                this.notifyTyping();
+            }
+        })
+
+        this.$channelsList.on('click', 'a[data-channel-id', (event) => {
+            event.preventDefault();
+
+            let $linkEl  = $(event.currentTarget);
+            let chanelId = $linkEl.data('channel-id');
+
+            this.channelsList.find('a[data-channel-id]').removeClass('bg-dark');
+            $linkEl.addClass('bg-dark');
+
+            $('span.channelTitle').text($linkEl.text().trim());
+
+            this.changeChannel(chanelId);
+        })
+
+    }
+
+    notifyTyping(){
+        this.socket.emit('notify:typing');
     }
 
     /**
